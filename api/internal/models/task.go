@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -77,4 +78,32 @@ func GetAllTasks(db *sql.DB, listID int, status string, priority string, assigne
 		tasks = append(tasks, task)
 	}
 	return tasks, nil
+}
+
+func CreateTaskTable(db *sql.DB, db_type string) error {
+	if db_type == "sqlite3" {
+		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS tasks (
+			id INTEGER PRIMARY KEY,
+			name TEXT NOT NULL,
+			list_id INTEGER NOT NULL,
+			description TEXT NOT NULL,
+			status TEXT NOT NULL,
+			priority INTEGER NOT NULL,
+			assignee_id INTEGER NOT NULL
+		);`)
+		return err
+	} else if db_type == "mysql" {
+		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS tasks (
+			id INTEGER PRIMARY KEY AUTO_INCREMENT,
+			name TEXT NOT NULL,
+			list_id INTEGER NOT NULL,
+			description TEXT NOT NULL,
+			status TEXT NOT NULL,
+			priority INTEGER NOT NULL,
+			assignee_id INTEGER NOT NULL
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
+		return err
+	} else {
+		return errors.New("unsupported driver")
+	}
 }

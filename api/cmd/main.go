@@ -1,29 +1,30 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/stephen-pp/yata/api/db"
-	"github.com/stephen-pp/yata/api/internal/models"
+	"github.com/stephen-pp/yata/api/internal/handlers"
 )
 
 func main() {
-	// SQLite
-	dbSQLite := db.InitializeDB("sqlite3", "./app.db")
-	defer dbSQLite.Close()
-
-	// MySQL
-	dbMySQL := db.InitializeDB("mysql", "root:password@tcp(localhost:3306)/test")
-	defer dbMySQL.Close()
-
 	// Create a new category
-	category := models.NewCategory(dbMySQL, "Personal") // Replace dbSQLite with dbMySQL to test MySQL
-	err := category.Save()
-	if err != nil {
+	// category := models.NewCategory(dbSQLite, "Personal") // Replace dbSQLite with dbMySQL to test MySQL
+	// err := category.Save()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	fmt.Println("starting webserver on port :8080")
+
+	// Register functions and middlewares
+	http.HandleFunc("/access-token", handlers.GenerateAccessToken)
+
+	err := http.ListenAndServe(":8080", nil)
+	if !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
-
-	fmt.Println("Data created successfully!")
 }

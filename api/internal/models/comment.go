@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 )
 
 type Comment struct {
@@ -60,4 +61,24 @@ func GetAllCommentsByTaskID(db *sql.DB, taskID int) ([]Comment, error) {
 		comments = append(comments, comment)
 	}
 	return comments, nil
+}
+
+func CreateCommentTable(db *sql.DB, db_type string) error {
+	if db_type == "sqlite3" {
+		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS comments (
+			id INTEGER PRIMARY KEY,
+			task_id INTEGER NOT NULL,
+			text TEXT NOT NULL
+		);`)
+		return err
+	} else if db_type == "mysql" {
+		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS comments (
+			id INTEGER PRIMARY KEY AUTO_INCREMENT,
+			task_id INTEGER NOT NULL,
+			text TEXT NOT NULL
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
+		return err
+	} else {
+		return errors.New("unsupported driver")
+	}
 }

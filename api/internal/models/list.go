@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 )
 
 type List struct {
@@ -55,4 +56,26 @@ func GetAllListsByCategory(db *sql.DB, categoryID int) ([]List, error) {
 		lists = append(lists, list)
 	}
 	return lists, nil
+}
+
+func CreateListTable(db *sql.DB, db_type string) error {
+	if db_type == "sqlite3" {
+		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS lists (
+			id INTEGER PRIMARY KEY,
+			name TEXT NOT NULL,
+			category_id INTEGER NOT NULL,
+			description TEXT NOT NULL
+		);`)
+		return err
+	} else if db_type == "mysql" {
+		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS lists (
+			id INTEGER PRIMARY KEY AUTO_INCREMENT,
+			name TEXT NOT NULL,
+			category_id INTEGER NOT NULL,
+			description TEXT NOT NULL
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
+		return err
+	} else {
+		return errors.New("unsupported driver")
+	}
 }
